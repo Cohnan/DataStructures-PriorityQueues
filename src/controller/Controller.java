@@ -3,6 +3,7 @@ package controller;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Scanner;
 
@@ -22,13 +23,11 @@ public class Controller {
 
 	private IArregloDinamico<VOMovingViolation> movingVOLista;
 
-	// TODO Definir las estructuras de datos para cargar las infracciones del periodo definido
-
 	// Muestra obtenida de los datos cargados 
-	Comparable<VOMovingViolation> [ ] muestra;
+	IArregloDinamico<VOMovingViolation> muestra;
 
 	// Copia de la muestra de datos a ordenar 
-	Comparable<VOMovingViolation> [ ] muestraCopia;
+	IArregloDinamico<VOMovingViolation> muestraCopia;
 
 	public Controller() {
 		view = new MovingViolationsManagerView();
@@ -74,11 +73,6 @@ public class Controller {
 			}
 
 			for (int contador : contadores) suma += contador;
-			/*System.out.println("  ----------Informaci�n Sobre la Carga------------------  ");
-			for (int i = 0; i < contadores.length; i++) {
-				System.out.println("Infracciones Mes " + (i+1)+": " + contadores[i]);
-			}
-			System.out.println("Total Infracciones Cuatrisemetre: " + suma);*/
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -111,9 +105,41 @@ public class Controller {
 	 * @param n tamaNo de la muestra, n > 0
 	 * @return muestra generada
 	 */
-	public Comparable<VOMovingViolation>[] generarMuestra( int n )
+	public void generarMuestra( int n )
 	{
-		return null;
+		if(n > 240000){
+			throw new IllegalArgumentException("No se generan muestras de tal tamanio.");
+		}
+		muestra = new ArregloDinamico<VOMovingViolation>(n);	
+		IArregloDinamico<Integer> posiciones  =  new ArregloDinamico<>(n);
+		
+		// Generar posiciones
+		long initTimePosGen = System.currentTimeMillis();
+		for (int i = 0; i < n; i++){
+			posiciones.agregar((int)(Math.random() * (movingVOLista.darTamano()-1)));
+		}
+		
+		while(!Sort.isSorted(Comparator.<Integer>naturalOrder(), posiciones)) {
+			Sort.ordenarShellSort(posiciones, Comparator.<Integer>naturalOrder()); //Rapido para listas parcialmente ordenadas
+			for (int i = 0; i < n-1; i++) {
+				while (posiciones.darObjeto(i) == posiciones.darObjeto(i+1)) posiciones.cambiarEnPos(i,(int)(Math.random() * movingVOLista.darTamano()-1));
+			}
+		}
+		
+		// Cargar muestra
+		int contadorInf = 0;
+		Iterator<VOMovingViolation> iterador = movingVOLista.iterator();
+		VOMovingViolation infraccionAct = iterador.next();
+		long initTimeCargando = System.currentTimeMillis();
+		for (int i = 0; i < n; i++) {
+			while (contadorInf != posiciones.darObjeto(i)) {
+				infraccionAct = iterador.next();
+				contadorInf += 1;
+			}
+			muestra.cambiarEnPos(i, infraccionAct);
+		}
+		
+		
 	}
 
 	/**
@@ -135,11 +161,11 @@ public class Controller {
 	 * datos[0] y datos[N-1] se intercambian, datos[1] y datos[N-2] se intercambian, datos[2] y datos[N-3] se intercambian, ...
 	 * @param datos - conjunto de datos af invertir (inicio) y conjunto de datos invertidos (final)
 	 */
-	public void invertirMuestra( Comparable[ ] datos ) {
-		int n = datos.length;
+	public <T> void invertirMuestra( IArregloDinamico<T> datos ) {
+		int n = datos.darTamano();
 		Comparable[] auxiliar = new Comparable[n];
 		// Hacer copia invertida
-		for (int i = 0; i < datos.length; i++) auxiliar[i] = datos[n-i-1];
+		for (int i = 0; i < datos.darTamano(); i++) auxiliar[i] = datos[n-i-1];
 		// Pegar datos al arreglo original
 		for (int i = 0; i < datos.length; i++) datos[i] = auxiliar[i];
 		
@@ -174,13 +200,13 @@ public class Controller {
 				// Generar muestra de infracciones a ordenar
 				view.printMensage("Dar tamaNo de la muestra: ");
 				nMuestra = sc.nextInt();
-				muestra = this.generarMuestra( nMuestra );
+				this.generarMuestra( nMuestra );
 				view.printMensage("Muestra generada");
 				break;
 
 			case 3:
 				// Mostrar los datos de la muestra actual (original)
-				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
+				if ( nMuestra > 0 && muestra != null && muestra.darTamano() == nMuestra )
 				{    
 					view.printDatosMuestra( nMuestra, muestra);
 				}
@@ -251,7 +277,7 @@ public class Controller {
 				// Mostrar los datos de la muestra ordenada (muestra copia)
 				
 				
-				if ( nMuestra > 0 && muestraCopia != null && muestraCopia.length == nMuestra )
+				if ( nMuestra > 0 && muestraCopia != null && muestraCopia.darTamano() == nMuestra )
 				{    view.printDatosMuestra( nMuestra, muestraCopia);    }
 				else
 				{
@@ -261,7 +287,7 @@ public class Controller {
 
 			case 8:	
 				// Una muestra ordenada se convierte en la muestra a ordenar
-				if ( nMuestra > 0 && muestraCopia != null && muestraCopia.length == nMuestra )
+				if ( nMuestra > 0 && muestraCopia != null && muestraCopia.darTamano() == nMuestra )
 				{    
 					muestra = muestraCopia;
 					view.printMensage("La muestra ordenada (copia) es ahora la muestra de datos a ordenar");
