@@ -52,7 +52,7 @@ public class Controller {
 		int fileCounter = 0;
 		int suma = 0;
 		try {
-			movingVOLista = new Queue<VOMovingViolation>();
+			movingVOLista = new ArregloDinamico<VOMovingViolation>();
 
 			for (String filePath : movingViolationsFilePaths) {
 				reader = new CSVReader(new FileReader(filePath));
@@ -67,7 +67,7 @@ public class Controller {
 				// Carga de las infracciones a la cola, teniendo en cuenta el formato del archivo
 				contadores[fileCounter] = 0;
 				for (String[] row : reader) {
-					movingVOLista.enqueue(new VOMovingViolation(posiciones, row));
+					movingVOLista.agregar(new VOMovingViolation(posiciones, row));
 					contadores[fileCounter] += 1;
 				}
 				fileCounter += 1;
@@ -113,79 +113,7 @@ public class Controller {
 	 */
 	public Comparable<VOMovingViolation>[] generarMuestra( int n )
 	{
-
-		if(n > 240000){
-			throw new IllegalArgumentException("No se generan muestras de tal tamanio.");
-		}
-		muestra = new Comparable[ n ];	
-		Integer[] posiciones  =  new Integer[n];
-		
-		// Generar posiciones
-		long initTimePosGen = System.currentTimeMillis();
-		for (int i = 0; i < n; i++){
-			posiciones[i] = (int)(Math.random() * (movingVOLista.darTamano()-1));
-		}
-		
-		Sort.ordenarQuickSort(posiciones);
-		while(!Sort.isSorted(posiciones)) {
-			Sort.ordenarShellSort(posiciones);
-			for (int i = 0; i < n-1; i++) {
-				while (posiciones[i] == posiciones[i+1]) posiciones[i] = (int)(Math.random() * movingVOLista.darTamano()-1);
-			}
-		}
-		/*
-		// Generar posiciones
-		contador = 0;
-		int random = 0;
-		int indDeRandom;
-		int temp;
-		long initTimePosGen = System.currentTimeMillis();
-		while(contador < n){
-			random = (int)(Math.random() * movingVOLista.darTamano()-1);
-			// Hallar la que seria la posiciones ordenada de random en el arreglo de posiciones
-			indDeRandom = contador;
-			while (indDeRandom > 0 && posiciones[indDeRandom - 1] > random) {
-				indDeRandom -=1;
-			}
-			// Agrega y aumenta el contador 
-			// si no se encuentra ya random en el arreglo
-			if (indDeRandom == 0 || posiciones[indDeRandom - 1] < random) {
-				posiciones[contador] = random;
-				for (int i = contador; i > indDeRandom; i--) {
-					temp = posiciones[i];
-					posiciones[i] = posiciones[i-1];
-					posiciones[i-1] = temp;
-				}
-				contador ++;
-			}
-		}
-		*/
-		///////////////////////////////////////////////////////////////////////////
-		long finTimePosGen = System.currentTimeMillis();
-		System.out.println("En generarse las posiciones se usaron " + (finTimePosGen - initTimePosGen) + "milis");
-		
-		// Cargar muestra
-		int contadorInf = 0;
-		Iterator<VOMovingViolation> iterador = movingVOLista.iterator();
-		VOMovingViolation infraccionAct = iterador.next();
-		long initTimeCargando = System.currentTimeMillis();
-		for (int i = 0; i < n; i++) {
-			while (contadorInf != posiciones[i]) {
-				infraccionAct = iterador.next();
-				contadorInf += 1;
-			}
-			muestra[i] = infraccionAct;
-		}
-		long finTimeCargando = System.currentTimeMillis();
-
-		
-		System.out.println("En cargar la muestra se usaron " + (finTimeCargando - initTimeCargando) + "milis");
-		System.out.println("Datos de la muestra: primer, segundo, ultimo y tamanio");
-		System.out.println(muestra[0] + " " + posiciones[0]);
-		System.out.println(muestra[1] + " " +  posiciones[1]);
-		System.out.println(muestra[n-1] + " " +  posiciones[n-1]);
-		System.out.println(movingVOLista.darTamano());
-		return muestra;
+		return null;
 	}
 
 	/**
@@ -201,32 +129,6 @@ public class Controller {
 		return copia;
 	}
 
-	/**
-	 * Ordenar datos aplicando el algoritmo ShellSort
-	 * @param datos - conjunto de datos a ordenar (inicio) y conjunto de datos ordenados (final)
-	 */
-	public void ordenarShellSort( Comparable<VOMovingViolation>[ ] datos ) {
-
-		Sort.ordenarShellSort(datos);
-	}
-
-	/**
-	 * Ordenar datos aplicando el algoritmo MergeSort
-	 * @param datos - conjunto de datos a ordenar (inicio) y conjunto de datos ordenados (final)
-	 */
-	public void ordenarMergeSort( Comparable<VOMovingViolation>[ ] datos ) {
-
-		Sort.ordenarMergeSort(datos);
-	}
-
-	/**
-	 * Ordenar datos aplicando el algoritmo QuickSort
-	 * @param datos - conjunto de datos a ordenar (inicio) y conjunto de datos ordenados (final)
-	 */
-	public void ordenarQuickSort( Comparable<VOMovingViolation>[ ] datos ) {
-
-		Sort.ordenarQuickSort(datos);
-	}
 
 	/**
 	 * Invertir una muestra de datos (in place).
@@ -287,7 +189,7 @@ public class Controller {
 					view.printMensage("Muestra invalida");
 				}
 				break;
-
+/*
 			case 4:
 				// Aplicar ShellSort a una copia de la muestra
 				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
@@ -344,7 +246,7 @@ public class Controller {
 					view.printMensage("Muestra invalida");
 				}
 				break;
-
+*/
 			case 7:
 				// Mostrar los datos de la muestra ordenada (muestra copia)
 				
