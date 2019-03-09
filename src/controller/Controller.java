@@ -136,7 +136,7 @@ public class Controller {
 				infraccionAct = iterador.next();
 				contadorInf += 1;
 			}
-			muestra.cambiarEnPos(i, infraccionAct);
+			muestra.agregar(infraccionAct);
 		}
 		
 		
@@ -153,22 +153,6 @@ public class Controller {
 		for ( int i = 0; i < muestra.length; i++)
 		{    copia[i] = muestra[i];    }
 		return copia;
-	}
-
-
-	/**
-	 * Invertir una muestra de datos (in place).
-	 * datos[0] y datos[N-1] se intercambian, datos[1] y datos[N-2] se intercambian, datos[2] y datos[N-3] se intercambian, ...
-	 * @param datos - conjunto de datos af invertir (inicio) y conjunto de datos invertidos (final)
-	 */
-	public <T> void invertirMuestra( IArregloDinamico<T> datos ) {
-		int n = datos.darTamano();
-		Comparable[] auxiliar = new Comparable[n];
-		// Hacer copia invertida
-		for (int i = 0; i < datos.darTamano(); i++) auxiliar[i] = datos[n-i-1];
-		// Pegar datos al arreglo original
-		for (int i = 0; i < datos.length; i++) datos[i] = auxiliar[i];
-		
 	}
 
 	public void run() {
@@ -293,7 +277,7 @@ public class Controller {
 					view.printMensage("La muestra ordenada (copia) es ahora la muestra de datos a ordenar");
 				}
 				break;
-
+/*
 			case 9:
 				// Invertir la muestra a ordenar
 				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
@@ -307,7 +291,7 @@ public class Controller {
 				}
 
 				break;
-
+*/
 			case 10:	
 				fin=true;
 				sc.close();
