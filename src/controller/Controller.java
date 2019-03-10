@@ -328,6 +328,8 @@ public class Controller {
 		respuesta.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
 	}
 	
+	
+	
 	public void run() {
 		int nDatos = 0;
 		int nMuestra = 0;
