@@ -5,7 +5,7 @@ import java.util.Iterator;
 public class MaxHeapCP <T extends Comparable<T>> implements IColaPrioridad<T>{
 
 	
-	private ArregloDinamico<T> cp;
+private ArregloDinamico<T> cp;
 	
 	
 	public MaxHeapCP(){
@@ -33,15 +33,18 @@ public class MaxHeapCP <T extends Comparable<T>> implements IColaPrioridad<T>{
 
 	public void agregar(T t){
 		cp.agregar(t);
-		swim(cp.darTamano() - 1);
+		swim(darNumElementos());
 	}
 
-	@Override
 	public T delMax() {
+	
+
+		if(darNumElementos() ==0) return null;
 		T max = cp.darObjeto(1);
-		exch(1,cp.darTamano()-1);
+		exch(1,darNumElementos());
+		cp.eliminarEnPos(darNumElementos());
 		sink(1);
-		cp.eliminarEnPos(cp.darTamano()-1);
+		
 		return max;
 	}
 
@@ -62,7 +65,7 @@ public class MaxHeapCP <T extends Comparable<T>> implements IColaPrioridad<T>{
 	
 	private void sink(int k){
 		
-		int N = cp.darTamano();
+		int N = darNumElementos();
 		while(2*k<=N){
 			int j = 2*k;
 			if(j<N && less(j,j+1)) j++;
