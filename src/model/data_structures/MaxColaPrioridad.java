@@ -42,10 +42,13 @@ public class MaxColaPrioridad<T extends Comparable<T>> implements IColaPrioridad
 		
 		// Reemplazar cola por la nueva cola
 		this.cola = colaFinal;
+		
+		tamano +=1;
 	}
 
 	public T delMax() {
 		if (tamano == 0) return null;
+		tamano -=1;
 		return cola.dequeue();
 	}
 

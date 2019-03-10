@@ -42,4 +42,10 @@ public class LocationVO implements Comparable<LocationVO> {
 	public int getNumberOfRegisters() {
 		return numberOfRegisters;
 	}
+	
+	@Override
+	public String toString(){
+		return "LocationVO: "+location +"numberOfRegs: "+ Integer.toString(numberOfRegisters);
+	}
+	
 }

@@ -58,7 +58,6 @@ public class ArregloDinamico<T> implements IArregloDinamico<T> {
             	elementos[i] = copia[i];
             }       
         }
-           
         elementos[tamanoAct] = dato;
         tamanoAct++;
     }
