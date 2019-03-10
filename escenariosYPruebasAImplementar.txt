@@ -1,0 +1,12 @@
+Escenarios de prueba:
+
+ - Cola Vacia
+	- Tratar de eliminar elementos
+	- Agregar elementos
+	- Eliminar estos elementos
+ - Cola con varios elementos, de al menos 3 prioridades diferentes, algunos identificados con exactamente la misma prioridad
+	- Eliminar varios elementos
+	- Agregar (al inicio) elemento muy grande
+	- Agregar en el medio. Confirmar que queda después de igual prioridad
+	- Agregar al final
+	- Eliminar todos los elementos e ir verificando que estaban ordenados por prioridad

@@ -11,7 +11,10 @@ import com.opencsv.CSVReader;
 
 import model.data_structures.*;
 import model.util.Sort;
+import model.vo.LocationVO;
 import model.vo.VOMovingViolation;
+import model.vo.VOMovingViolations;
+import model.vo.VOViolationCode;
 import view.MovingViolationsManagerView;
 
 @SuppressWarnings("unused")
@@ -22,12 +25,9 @@ public class Controller {
 	private MovingViolationsManagerView view;
 
 	private IArregloDinamico<VOMovingViolation> movingVOLista;
-
-	// Muestra obtenida de los datos cargados 
-	IArregloDinamico<VOMovingViolation> muestra;
-
-	// Copia de la muestra de datos a ordenar 
-	IArregloDinamico<VOMovingViolation> muestraCopia;
+	private IArregloDinamico<LocationVO> locationVOLista;
+	private IArregloDinamico<LocationVO> muestraLoc;
+	private IArregloDinamico<LocationVO> muestraLocCopia;
 
 	public Controller() {
 		view = new MovingViolationsManagerView();
@@ -41,19 +41,17 @@ public class Controller {
 	 * A partir de estos datos se obtendran muestras para evaluar los algoritmos de ordenamiento
 	 * @return numero de infracciones leidas 
 	 */
-	public int loadMovingViolations() {
-		// TODO Los datos de los archivos deben guardarse en la Estructura de Datos definida
-
+	public void loadMovingViolations() {
 		CSVReader reader = null;
 
 		// Contadores de infracciones en cada mes de los archivos a cargar
-		int[] contadores = new int[movingViolationsFilePaths.length];
-		int fileCounter = 0;
-		int suma = 0;
+		int[] contadores = new int[movingViolationsFilePaths.length]; // No se usa en este taller
+		int fileCounter = 0; 
 		try {
 			movingVOLista = new ArregloDinamico<VOMovingViolation>();
 
 			for (String filePath : movingViolationsFilePaths) {
+				// Entender el header
 				reader = new CSVReader(new FileReader(filePath));
 				String[] headers = reader.readNext();
 				// Array con la posicion de cada header conocido (e.g. LOCATION) dentro del header del archivo
@@ -63,6 +61,7 @@ public class Controller {
 				for (int i = 0; i < VOMovingViolation.EXPECTEDHEADERS.length; i++) {
 					posiciones[i] = buscarArray(headers, VOMovingViolation.EXPECTEDHEADERS[i]);
 				}
+				
 				// Carga de las infracciones a la cola, teniendo en cuenta el formato del archivo
 				contadores[fileCounter] = 0;
 				for (String[] row : reader) {
@@ -71,8 +70,45 @@ public class Controller {
 				}
 				fileCounter += 1;
 			}
+			
+			/*
+			 * Generar la lista de LocationVOs
+			 */
+			Sort.ordenarQuickSort(movingVOLista, new VOMovingViolation.AddressIDOrder());
+			
+			// Inicializar la lista de LocationVOs
+			locationVOLista = new ArregloDinamico<LocationVO>();
 
-			for (int contador : contadores) suma += contador;
+			// Si no hay datos, entonces deja la cola vacia
+			Iterator<VOMovingViolation> iterador = movingVOLista.iterator();
+			if (!iterador.hasNext()) {return;}
+
+			// Como los datos estan ordenados, tomamos una infraccion de referencia para comparar con
+			// los datos inmediatamente siguientes
+			VOMovingViolation infrRevisar = iterador.next();
+			int addressRef = infrRevisar.getAddressID();
+			String locationRef = infrRevisar.getLocation();
+			// Contador de infracciones con el mismo AddressID
+			int contadorIgs = 1;
+
+			while (iterador.hasNext()) { // Podria hacerse diferente
+				infrRevisar = iterador.next();
+
+				if (addressRef == infrRevisar.getAddressID()) {
+					// Actualiza contadores
+					contadorIgs += 1;
+				} else {
+					// Agrega el LocationVO que esta revisando a la cola
+					locationVOLista.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
+					
+					// Reestablece referencias
+					addressRef = infrRevisar.getAddressID();
+					locationRef = infrRevisar.getLocation();
+					contadorIgs = 1;
+				}
+			}
+			// Agregar la ultima referencia 
+			locationVOLista.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -85,8 +121,6 @@ public class Controller {
 				}
 			}
 		}
-
-		return suma;
 	}
 
 	private int buscarArray(String[] array, String string) {
@@ -105,12 +139,13 @@ public class Controller {
 	 * @param n tamaNo de la muestra, n > 0
 	 * @return muestra generada
 	 */
-	public void generarMuestra( int n )
+	public IArregloDinamico<VOMovingViolation> generarMuestraInfracciones(int n)
 	{
-		if(n > 240000){
+		if(n > movingVOLista.darTamano()){
 			throw new IllegalArgumentException("No se generan muestras de tal tamanio.");
 		}
-		muestra = new ArregloDinamico<VOMovingViolation>(n);	
+		
+		IArregloDinamico<VOMovingViolation> muestra = new ArregloDinamico<VOMovingViolation>(n);	
 		IArregloDinamico<Integer> posiciones  =  new ArregloDinamico<>(n);
 		
 		// Generar posiciones
@@ -130,7 +165,7 @@ public class Controller {
 		int contadorInf = 0;
 		Iterator<VOMovingViolation> iterador = movingVOLista.iterator();
 		VOMovingViolation infraccionAct = iterador.next();
-		long initTimeCargando = System.currentTimeMillis();
+		//long initTimeCargando = System.currentTimeMillis();
 		for (int i = 0; i < n; i++) {
 			while (contadorInf != posiciones.darObjeto(i)) {
 				infraccionAct = iterador.next();
@@ -139,9 +174,50 @@ public class Controller {
 			muestra.agregar(infraccionAct);
 		}
 		
-		
+		return muestra;
 	}
 
+	/**
+	 * Generar una muestra aleatoria de tamaNo n de los datos leidos.
+	 * Los datos de la muestra se obtienen de las infracciones guardadas en la Estructura de Datos.
+	 * @param n tamaNo de la muestra, n > 0
+	 * @return muestra generada
+	 */
+	public IArregloDinamico<LocationVO> generarMuestraLocM2(int n)
+	{	
+		// TODO
+		IArregloDinamico<LocationVO> muestra = new ArregloDinamico<LocationVO>(n);	
+		IArregloDinamico<Integer> posiciones  =  new ArregloDinamico<>(n);
+		
+		// Generar posiciones
+		long initTimePosGen = System.currentTimeMillis();
+		for (int i = 0; i < n; i++){
+			posiciones.agregar((int)(Math.random() * (movingVOLista.darTamano()-1)));
+		}
+		
+		while(!Sort.isSorted(Comparator.<Integer>naturalOrder(), posiciones)) {
+			Sort.ordenarShellSort(posiciones, Comparator.<Integer>naturalOrder()); //Rapido para listas parcialmente ordenadas
+			for (int i = 0; i < n-1; i++) {
+				while (posiciones.darObjeto(i) == posiciones.darObjeto(i+1)) posiciones.cambiarEnPos(i,(int)(Math.random() * movingVOLista.darTamano()-1));
+			}
+		}
+		
+		// Cargar muestra
+		int contadorInf = 0;
+		Iterator<VOMovingViolation> iterador = movingVOLista.iterator();
+		VOMovingViolation infraccionAct = iterador.next();
+		//long initTimeCargando = System.currentTimeMillis();
+		for (int i = 0; i < n; i++) {
+			while (contadorInf != posiciones.darObjeto(i)) {
+				infraccionAct = iterador.next();
+				contadorInf += 1;
+			}
+			muestra.agregar(infraccionAct);
+		}
+		
+		return muestra;
+	}
+	
 	/**
 	 * Generar una copia de una muestra. Se genera un nuevo arreglo con los mismos elementos.
 	 * @param muestra - datos de la muestra original
@@ -190,9 +266,9 @@ public class Controller {
 
 			case 3:
 				// Mostrar los datos de la muestra actual (original)
-				if ( nMuestra > 0 && muestra != null && muestra.darTamano() == nMuestra )
+				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
 				{    
-					view.printDatosMuestra( nMuestra, muestra);
+					view.printDatosMuestra( nMuestra, muestraLoc);
 				}
 				else
 				{
@@ -204,9 +280,9 @@ public class Controller {
 				// Aplicar ShellSort a una copia de la muestra
 				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
 				{
-					muestraCopia = this.obtenerCopia(muestra);
+					muestraLocCopia = this.obtenerCopia(muestra);
 					startTime = System.currentTimeMillis();
-					this.ordenarShellSort(muestraCopia);
+					this.ordenarShellSort(muestraLocCopia);
 					endTime = System.currentTimeMillis();
 					duration = endTime - startTime;
 					view.printMensage("Ordenamiento generado en una copia de la muestra");
@@ -222,9 +298,9 @@ public class Controller {
 				// Aplicar MergeSort a una copia de la muestra
 				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
 				{
-					muestraCopia = this.obtenerCopia(muestra);
+					muestraLocCopia = this.obtenerCopia(muestra);
 					startTime = System.currentTimeMillis();
-					this.ordenarMergeSort(muestraCopia);
+					this.ordenarMergeSort(muestraLocCopia);
 					endTime = System.currentTimeMillis();
 					duration = endTime - startTime;
 					view.printMensage("Ordenamiento generado en una copia de la muestra");
@@ -243,9 +319,9 @@ public class Controller {
 				
 				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
 				{
-					muestraCopia = this.obtenerCopia(muestra);
+					muestraLocCopia = this.obtenerCopia(muestra);
 					startTime = System.currentTimeMillis();
-					this.ordenarQuickSort(muestraCopia);
+					this.ordenarQuickSort(muestraLocCopia);
 					endTime = System.currentTimeMillis();
 					duration = endTime - startTime;
 					view.printMensage("Ordenamiento generado en una copia de la muestra");
@@ -261,8 +337,8 @@ public class Controller {
 				// Mostrar los datos de la muestra ordenada (muestra copia)
 				
 				
-				if ( nMuestra > 0 && muestraCopia != null && muestraCopia.darTamano() == nMuestra )
-				{    view.printDatosMuestra( nMuestra, muestraCopia);    }
+				if ( nMuestra > 0 && muestraLocCopia != null && muestraLocCopia.darTamano() == nMuestra )
+				{    view.printDatosMuestra( nMuestra, muestraLocCopia);    }
 				else
 				{
 					view.printMensage("Muestra Ordenada invalida");
@@ -271,9 +347,9 @@ public class Controller {
 
 			case 8:	
 				// Una muestra ordenada se convierte en la muestra a ordenar
-				if ( nMuestra > 0 && muestraCopia != null && muestraCopia.darTamano() == nMuestra )
+				if ( nMuestra > 0 && muestraLocCopia != null && muestraLocCopia.darTamano() == nMuestra )
 				{    
-					muestra = muestraCopia;
+					muestraLoc = muestraLocCopia;
 					view.printMensage("La muestra ordenada (copia) es ahora la muestra de datos a ordenar");
 				}
 				break;

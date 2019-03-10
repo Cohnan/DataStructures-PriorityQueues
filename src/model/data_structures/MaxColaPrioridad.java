@@ -30,8 +30,9 @@ public class MaxColaPrioridad<T extends Comparable<T>> implements IColaPrioridad
 		boolean agregado = false;
 		Queue<T> colaFinal = new Queue<T>();
 		for(T elemento : cola) {
+			// Agregar el nuevo elemento a la nueva cola en donde corresponda (>: lo agrega al final de los elementos con su misma prioridad)
 			if (!agregado && t.compareTo(elemento) > 0) {
-				colaFinal.enqueue(t); // > para agregarlo al final de aquellos elementos con la misma prioridad
+				colaFinal.enqueue(t); 
 				agregado = true;
 			}
 			colaFinal.enqueue(cola.dequeue()); // Dequeue de la cola original para no ocupar mas espacio

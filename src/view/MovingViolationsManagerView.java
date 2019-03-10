@@ -1,6 +1,7 @@
 package view;
 
 import model.data_structures.IArregloDinamico;
+import model.vo.LocationVO;
 import model.vo.VOMovingViolation;
 
 public class MovingViolationsManagerView 
@@ -26,9 +27,9 @@ public class MovingViolationsManagerView
 		
 	}
 	
-	public void printDatosMuestra( int nMuestra, IArregloDinamico<VOMovingViolation> muestra)
+	public void printDatosMuestra( int nMuestra, IArregloDinamico<LocationVO> muestra)
 	{
-		for ( VOMovingViolation dato : muestra)
+		for ( LocationVO dato : muestra)
 		{	System.out.println(  dato.toString() );    }
 	}
 	

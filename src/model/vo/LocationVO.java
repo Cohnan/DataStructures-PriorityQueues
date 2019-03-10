@@ -21,7 +21,6 @@ public class LocationVO implements Comparable<LocationVO> {
 	/*
 	 * Metodos
 	 */
-	@Override
 	public int compareTo(LocationVO loc2) {
 		int comparation = numberOfRegisters - loc2.getNumberOfRegisters(); 
 		if(comparation != 0) return comparation;
@@ -43,5 +42,4 @@ public class LocationVO implements Comparable<LocationVO> {
 	public int getNumberOfRegisters() {
 		return numberOfRegisters;
 	}
-
 }
