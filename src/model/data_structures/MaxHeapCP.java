@@ -10,30 +10,30 @@ public class MaxHeapCP <T extends Comparable<T>> implements IColaPrioridad<T>{
 	
 	public MaxHeapCP(){
 		cp = new ArregloDinamico<T>();
+		cp.agregar(null);
 	}
 	
 	
 	
 	@Override
-	public Iterator iterator() {
-		// TODO Auto-generated method stub
-		return null;
+	public Iterator<T> iterator() {
+		return cp.iterator();
 	}
 
 	@Override
 	public boolean esVacia() {
-		if(cp.darTamano() == 0) return true;
+		if(cp.darTamano() == 1) return true;
 		return false;
 	}
 
 	@Override
 	public int darNumElementos() {
-		return cp.darTamano();
+		return cp.darTamano()-1;
 	}
 
 	public void agregar(T t){
 		cp.agregar(t);
-		swim(cp.darTamano());
+		swim(cp.darTamano() - 1);
 	}
 
 	@Override
@@ -41,7 +41,7 @@ public class MaxHeapCP <T extends Comparable<T>> implements IColaPrioridad<T>{
 		T max = cp.darObjeto(1);
 		exch(1,cp.darTamano()-1);
 		sink(1);
-		cp.agregar(null);
+		cp.eliminarEnPos(cp.darTamano()-1);
 		return max;
 	}
 
