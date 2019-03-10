@@ -127,13 +127,7 @@ public class Sort {
 	 */
 	public static <T> void ordenarQuickSort(IArregloDinamico<T> datos, Comparator<T> c) {
 		// Desordenar: basado shuffle() de la libreria StdRandom del libro
-		int n = datos.darTamano();
-		int r;
-		Random random = new Random(System.currentTimeMillis());
-        for (int i = 0; i < n; i++) {
-            r = i + random.nextInt(n-i);
-            exchange(datos, i, r);
-        }
+		shuffle(datos);
 		ordenarQuickSort(datos, 0, datos.darTamano()-1, c);
 	}
 	
@@ -200,5 +194,14 @@ public class Sort {
 			if (less(datos.darObjeto(i+1), datos.darObjeto(i), c)) return false;
 		return true;
 	}
-
+	
+	public static <T> void shuffle(IArregloDinamico<T> datos) {
+		int n = datos.darTamano();
+		int r;
+		Random random = new Random(System.currentTimeMillis());
+        for (int i = 0; i < n; i++) {
+            r = i + random.nextInt(n-i);
+            exchange(datos, i, r);
+        }
+	}
 }
