@@ -2,6 +2,7 @@ package controller;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -264,6 +265,69 @@ public class Controller {
 		return duraciones;
 	}
 
+	private MaxColaPrioridad <LocationVO> crearMaxColaP (LocalDateTime fInicial, LocalDateTime 
+			fFinal){
+		MaxColaPrioridad<LocationVO> respuesta = new MaxColaPrioridad<LocationVO>();
+		creacionDeColas(respuesta, fInicial, fFinal);
+		return respuesta;
+	}
+	
+	private MaxHeapCP <LocationVO> crearMaxHeapCP (LocalDateTime fInicial, LocalDateTime fFinal) {
+		MaxHeapCP<LocationVO> respuesta = new MaxHeapCP<LocationVO>();
+		creacionDeColas(respuesta, fInicial, fFinal);
+		return respuesta;
+	}
+	
+	private void creacionDeColas(IColaPrioridad<LocationVO> respuesta, LocalDateTime fInicial, LocalDateTime fFinal) {
+		if (!Sort.isSorted(new VOMovingViolation.AddressIDOrder(), movingVOLista)) {
+			Sort.ordenarShellSort(movingVOLista, new VOMovingViolation.AddressIDOrder());
+		}
+		
+		// Inicializar la lista de LocationVOs
+		//MaxHeapCP<LocationVO> respuesta = new MaxHeapCP<LocationVO>();
+
+		// Si no hay datos, entonces deja la cola vacia
+		Iterator<VOMovingViolation> iterador = movingVOLista.iterator();
+		if (!iterador.hasNext()) {return;}
+
+		// Como los datos estan ordenados, tomamos una infraccion de referencia para comparar con
+		// los datos inmediatamente siguientes
+		VOMovingViolation infrRevisar = iterador.next();
+		int addressRef = infrRevisar.getAddressID();
+		String locationRef = infrRevisar.getLocation();
+		// Contador de infracciones con el mismo AddressID en el rango de fechas indicado
+		int contadorIgs = 0;
+		if (infrRevisar.getTicketIssueDate().compareTo(fInicial) >= 0 && 
+				infrRevisar.getTicketIssueDate().compareTo(fFinal) <= 0) {
+			contadorIgs += 1;
+		}
+		while (iterador.hasNext()) { // Podria hacerse diferente
+			infrRevisar = iterador.next();
+	
+			if (addressRef == infrRevisar.getAddressID()) {
+				// Actualiza contadores
+				if (infrRevisar.getTicketIssueDate().compareTo(fInicial) >= 0 && 
+						infrRevisar.getTicketIssueDate().compareTo(fFinal) <= 0) {
+					contadorIgs += 1;
+				}
+			} else {
+				// Agrega el LocationVO que esta revisando a la cola
+				respuesta.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
+				
+			// 	Reestablece referencias
+				addressRef = infrRevisar.getAddressID();
+				locationRef = infrRevisar.getLocation();
+				contadorIgs = 0;
+				if (infrRevisar.getTicketIssueDate().compareTo(fInicial) >= 0 && 
+						infrRevisar.getTicketIssueDate().compareTo(fFinal) <= 0) {
+					contadorIgs += 1;
+				}
+			}
+		}
+		// Agregar la ultima referencia 
+		respuesta.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
+	}
+	
 	public void run() {
 		int nDatos = 0;
 		int nMuestra = 0;
