@@ -392,8 +392,8 @@ public class Controller {
 				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
 				{
 					tiempos = this.medirTiemposPromedio(new MaxHeapCP<LocationVO>());
-					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " milisegundos.");
-					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " milisegundos");
+					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " nanosegundos.");
+					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " nanosegundos.");
 				}
 				else
 				{
