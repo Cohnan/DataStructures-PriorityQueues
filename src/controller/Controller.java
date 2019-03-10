@@ -3,7 +3,9 @@ package controller;
 import java.io.FileReader;
 import java.io.IOException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -272,12 +274,14 @@ public class Controller {
 			fFinal){
 		MaxColaPrioridad<LocationVO> respuesta = new MaxColaPrioridad<LocationVO>();
 		creacionDeColas(respuesta, fInicial, fFinal);
+		System.out.println(respuesta.darNumElementos());
 		return respuesta;
 	}
 	
 	private MaxHeapCP <LocationVO> crearMaxHeapCP (LocalDateTime fInicial, LocalDateTime fFinal) {
 		MaxHeapCP<LocationVO> respuesta = new MaxHeapCP<LocationVO>();
 		creacionDeColas(respuesta, fInicial, fFinal);
+		System.out.println(respuesta.darNumElementos());
 		return respuesta;
 	}
 	
@@ -330,7 +334,26 @@ public class Controller {
 		// Agregar la ultima referencia 
 		respuesta.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
 	}
+
 	
+	public double[] contabilizarTiempo(LocalDateTime fechaInicial, LocalDateTime fechaFinal){
+		
+		double tiempo1 = 0;
+		double tiempo2 = 0;
+		
+		
+		long startTime = System.currentTimeMillis();
+		crearMaxColaP(fechaInicial, fechaFinal);
+		long endTime = System.currentTimeMillis();
+		tiempo1 = (double) (endTime- startTime);
+		
+		startTime = System.currentTimeMillis();
+		crearMaxHeapCP(fechaInicial, fechaFinal);
+		endTime = System.currentTimeMillis();
+		tiempo2 =(double) (endTime- startTime);
+		
+		return new double [] {tiempo1 , tiempo2};
+	}
 	
 	
 	public void run() {
@@ -402,6 +425,19 @@ public class Controller {
 					view.printMensage("Muestra invalida");
 				}
 				break;
+			case 6:
+				view.printMensage("Ingrese la fecha con hora inicial (Ej : 01/04/2018T04:40:00)");
+				LocalDateTime fechaInicialReq2A = convertirFecha_Hora_LDT(sc.next());
+
+				view.printMensage("Ingrese la fecha con hora final (Ej : 01/04/2018T04:40:00)");
+				LocalDateTime fechaFinalReq2A = convertirFecha_Hora_LDT(sc.next());
+				
+				double [] respuesta = contabilizarTiempo(fechaInicialReq2A, fechaFinalReq2A);
+				System.out.println("Tiempo Cola de Prioridad:  " + respuesta[0] + " milisegundos");
+				System.out.println("Tiempo Heap: " + respuesta[1] + " milisegundos");
+				
+				break;
+				
 /*
 			case 6:
 				// Aplicar QuickSort a una copia de la muestra
@@ -466,5 +502,23 @@ public class Controller {
 			}
 		}
 	}
+	
+	
+	/**
+	 * Convertir fecha a un objeto LocalDate
+	 * @param fecha fecha en formato dd/mm/aaaa con dd para dia, mm para mes y aaaa para agno
+	 * @return objeto LD con fecha
+	 */
+
+	/**
+	 * Convertir fecha y hora a un objeto LocalDateTime
+	 * @param fecha fecha en formato yyyy-MM-dd'T'HH:mm:ss'.000Z' con dd para dia, mm para mes y yyy para agno, HH para hora, mm para minutos y ss para segundos
+	 * @return objeto LDT con fecha y hora integrados
+	 */
+	private static LocalDateTime convertirFecha_Hora_LDT(String fechaHora)
+	{
+		return LocalDateTime.parse(fechaHora, DateTimeFormatter.ofPattern("dd/MM/yyyy'T'HH:mm:ss"));
+
+    }
 
 }

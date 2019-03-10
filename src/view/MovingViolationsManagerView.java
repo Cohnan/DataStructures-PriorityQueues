@@ -18,11 +18,7 @@ public class MovingViolationsManagerView
 		System.out.println("3. Mostrar la muestra de datos a ordenar");
 		System.out.println("4. MaxColaPrioridad: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual");
 		System.out.println("5. MaxHeapCP: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual");
-		System.out.println("6. Ordenar datos de la muestra por Quicksort (ordenamiento de una copia de la muestra)");
-		System.out.println("7. Mostrar la muestra ordenada (muestra copia)");
-		System.out.println("8. Volver la muestra ordenada (copia) como la muestra actual a ordenar");
-		System.out.println("9. Invertir la muestra de datos");
-		System.out.println("10. Salir");
+		System.out.println("6. Comparación de tiempos");
 		System.out.println("Digite el numero de opcion para ejecutar la tarea, luego presione enter: (Ej., 1):");
 		
 	}
