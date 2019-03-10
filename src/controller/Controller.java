@@ -23,10 +23,9 @@ public class Controller {
 
 	private MovingViolationsManagerView view;
 
-	private IArregloDinamico<VOMovingViolation> movingVOLista;
-	private IArregloDinamico<LocationVO> locationVOLista;
-	private IArregloDinamico<LocationVO> muestraLoc;
-	private IArregloDinamico<LocationVO> muestraLocCopia;
+	private static IArregloDinamico<VOMovingViolation> movingVOLista;
+	private static IArregloDinamico<LocationVO> locationVOLista;
+	private static IArregloDinamico<LocationVO> muestraLoc;
 
 	public Controller() {
 		view = new MovingViolationsManagerView();
@@ -234,12 +233,38 @@ public class Controller {
 		{    copia.agregar(loc);    }
 		return copia;
 	}
-
-	public void run() {
+	
+	/**
+	 * Devuelve los tiempos promedios para agregar y eliminar elementos en la cola
+	 * de prioridad dada por parametro
+	 * @param colaP Cola de Prioridad sobre la cual se adicionaran los elementos de la muestra
+	 * @return tiempos[0] el tiempo promedio de adicion; tiempos[1] el tiempo promedio de eliminacion
+	 */
+	public long[] medirTiemposPromedio(IColaPrioridad<LocationVO> colaP) {
 		long startTime;
 		long endTime;
-		long duration;
+		long[] duraciones = new long[2];
+		int totalDatos = colaP.darNumElementos();
+		
+		// Medicion de agregar()
+		startTime = System.currentTimeMillis();
+		for (LocationVO loc : muestraLoc) {
+			colaP.agregar(loc);
+		}
+		endTime = System.currentTimeMillis();
+		duraciones[0] = endTime - startTime;
+		
+		// Medicion de delMax()
+		startTime = System.currentTimeMillis();
+		for (int i = 0; i < totalDatos; i++) {
+			colaP.delMax();
+		}
+		endTime = System.currentTimeMillis();
+		duraciones[1] = endTime - startTime;
+		return duraciones;
+	}
 
+	public void run() {
 		int nDatos = 0;
 		int nMuestra = 0;
 
@@ -251,7 +276,8 @@ public class Controller {
 			view.printMenu();
 
 			int option = sc.nextInt();
-
+			long[] tiempos;
+			
 			switch(option)
 			{
 			case 1:
@@ -279,18 +305,14 @@ public class Controller {
 					view.printMensage("Muestra invalida");
 				}
 				break;
-/*
+
 			case 4:
-				// Aplicar ShellSort a una copia de la muestra
-				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
+				// MaxColaPrioridad: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual
+				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
 				{
-					muestraLocCopia = this.obtenerCopia(muestra);
-					startTime = System.currentTimeMillis();
-					this.ordenarShellSort(muestraLocCopia);
-					endTime = System.currentTimeMillis();
-					duration = endTime - startTime;
-					view.printMensage("Ordenamiento generado en una copia de la muestra");
-					view.printMensage("Tiempo de ordenamiento ShellSort: " + duration + " milisegundos");
+					tiempos = this.medirTiemposPromedio(new MaxColaPrioridad<LocationVO>());
+					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " milisegundos.");
+					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " milisegundos");
 				}
 				else
 				{
@@ -299,23 +321,19 @@ public class Controller {
 				break;
 
 			case 5:
-				// Aplicar MergeSort a una copia de la muestra
-				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
+				// MaxHeapCP: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual
+				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
 				{
-					muestraLocCopia = this.obtenerCopia(muestra);
-					startTime = System.currentTimeMillis();
-					this.ordenarMergeSort(muestraLocCopia);
-					endTime = System.currentTimeMillis();
-					duration = endTime - startTime;
-					view.printMensage("Ordenamiento generado en una copia de la muestra");
-					view.printMensage("Tiempo de ordenamiento MergeSort: " + duration + " milisegundos");
+					tiempos = this.medirTiemposPromedio(new MaxHeapCP<LocationVO>());
+					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " milisegundos.");
+					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " milisegundos");
 				}
 				else
 				{
 					view.printMensage("Muestra invalida");
 				}
 				break;
-
+/*
 			case 6:
 				// Aplicar QuickSort a una copia de la muestra
 				
@@ -336,7 +354,7 @@ public class Controller {
 					view.printMensage("Muestra invalida");
 				}
 				break;
-*/
+
 			case 7:
 				// Mostrar los datos de la muestra ordenada (muestra copia)
 				
@@ -357,7 +375,7 @@ public class Controller {
 					view.printMensage("La muestra ordenada (copia) es ahora la muestra de datos a ordenar");
 				}
 				break;
-/*
+
 			case 9:
 				// Invertir la muestra a ordenar
 				if ( nMuestra > 0 && muestra != null && muestra.length == nMuestra )
