@@ -2,7 +2,10 @@ package controller;
 
 import java.io.FileReader;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -239,7 +242,7 @@ public class Controller {
 	 * Devuelve los tiempos promedios para agregar y eliminar elementos en la cola
 	 * de prioridad dada por parametro
 	 * @param colaP Cola de Prioridad sobre la cual se adicionaran los elementos de la muestra
-	 * @return tiempos[0] el tiempo promedio de adicion; tiempos[1] el tiempo promedio de eliminacion
+	 * @return tiempos[0] el tiempo promedio de adicion; tiempos[1] el tiempo promedio de eliminacion (nanosegundos)
 	 */
 	public long[] medirTiemposPromedio(IColaPrioridad<LocationVO> colaP) {
 		long startTime;
@@ -248,20 +251,20 @@ public class Controller {
 		int totalDatos = colaP.darNumElementos();
 		
 		// Medicion de agregar()
-		startTime = System.currentTimeMillis();
+		startTime = System.nanoTime();//.truncatedTo(ChronoUnit.MICROS);
 		for (LocationVO loc : muestraLoc) {
 			colaP.agregar(loc);
 		}
-		endTime = System.currentTimeMillis();
-		duraciones[0] = endTime - startTime;
+		endTime = System.nanoTime();//.truncatedTo(ChronoUnit.MICROS);
+		duraciones[0] = (endTime - startTime)/muestraLoc.darTamano();
 		
 		// Medicion de delMax()
-		startTime = System.currentTimeMillis();
+		startTime = System.nanoTime();
 		for (int i = 0; i < totalDatos; i++) {
 			colaP.delMax();
 		}
-		endTime = System.currentTimeMillis();
-		duraciones[1] = endTime - startTime;
+		endTime = System.nanoTime();
+		duraciones[1] = (endTime - startTime)/muestraLoc.darTamano();
 		return duraciones;
 	}
 
@@ -377,8 +380,8 @@ public class Controller {
 				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
 				{
 					tiempos = this.medirTiemposPromedio(new MaxColaPrioridad<LocationVO>());
-					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " milisegundos.");
-					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " milisegundos");
+					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " nanosegundos.");
+					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " nanosegundos.");
 				}
 				else
 				{
@@ -391,8 +394,8 @@ public class Controller {
 				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
 				{
 					tiempos = this.medirTiemposPromedio(new MaxHeapCP<LocationVO>());
-					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " milisegundos.");
-					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " milisegundos");
+					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " nanosegundos.");
+					view.printMensage("Tiempo promedio de eliminacion: " + tiempos[1] + " nanosegundos.");
 				}
 				else
 				{
