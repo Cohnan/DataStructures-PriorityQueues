@@ -25,7 +25,7 @@ import view.MovingViolationsManagerView;
 @SuppressWarnings("unused")
 public class Controller {
 
-	public static final String[] movingViolationsFilePaths = new String[] {"data/Moving_Violations_Issued_in_January_2018.csv", "data/Moving_Violations_Issued_in_February_2018.csv", "data/Moving_Violations_Issued_in_March_2018.csv"};
+	public static final String[] movingViolationsFilePaths = new String[] {"data/Moving_Violations_Issued_in_January_2018.csv", "data/Moving_Violations_Issued_in_February_2018.csv", "data/Moving_Violations_Issued_in_March_2018.csv","data/Moving_Violations_Issued_in__April_2018.csv"};
 
 	private MovingViolationsManagerView view;
 
@@ -181,6 +181,42 @@ public class Controller {
 			muestra.agregar(infraccionAct);
 		}
 		
+		Sort.ordenarShellSort(movingVOLista, new VOMovingViolation.AddressIDOrder());
+		
+		// Inicializar la lista de LocationVOs
+		locationVOLista = new ArregloDinamico<LocationVO>();
+		// Si no hay datos, entonces deja la cola vacia
+		Iterator<VOMovingViolation> iterador2 = muestra.iterator();
+
+		// Como los datos estan ordenados, tomamos una infraccion de referencia para comparar con
+		// los datos inmediatamente siguientes
+		VOMovingViolation infrRevisar = iterador2.next();
+		int addressRef = infrRevisar.getAddressID();
+		String locationRef = infrRevisar.getLocation();
+		// Contador de infracciones con el mismo AddressID
+		int contadorIgs = 1;
+
+		while (iterador2.hasNext()) { // Podria hacerse diferente
+			infrRevisar = iterador2.next();
+
+			if (addressRef == infrRevisar.getAddressID()) {
+				// Actualiza contadores
+				contadorIgs += 1;
+			} else {
+				// Agrega el LocationVO que esta revisando a la cola
+				locationVOLista.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
+				
+				// Reestablece referencias
+				addressRef = infrRevisar.getAddressID();
+				locationRef = infrRevisar.getLocation();
+				contadorIgs = 1;
+			}
+		}
+		// Agregar la ultima referencia 
+		locationVOLista.agregar(new LocationVO(addressRef, locationRef, contadorIgs));
+		System.out.println("Hay " + locationVOLista.darTamano() + " LocationVOs");
+
+		muestraLoc = locationVOLista;
 		return muestra;
 	}
 
@@ -224,7 +260,7 @@ public class Controller {
 		}
 		// 
 		//Sort.shuffle(muestra);
-		this.muestraLoc = muestra;
+		//this.muestraLoc = muestra;
 		return muestra;
 	}
 	
@@ -274,14 +310,12 @@ public class Controller {
 			fFinal){
 		MaxColaPrioridad<LocationVO> respuesta = new MaxColaPrioridad<LocationVO>();
 		creacionDeColas(respuesta, fInicial, fFinal);
-		System.out.println(respuesta.darNumElementos());
 		return respuesta;
 	}
 	
 	private MaxHeapCP <LocationVO> crearMaxHeapCP (LocalDateTime fInicial, LocalDateTime fFinal) {
 		MaxHeapCP<LocationVO> respuesta = new MaxHeapCP<LocationVO>();
 		creacionDeColas(respuesta, fInicial, fFinal);
-		System.out.println(respuesta.darNumElementos());
 		return respuesta;
 	}
 	
@@ -382,13 +416,14 @@ public class Controller {
 				// Generar muestra de infracciones a ordenar
 				view.printMensage("Dar tamaNo de la muestra: ");
 				nMuestra = sc.nextInt();
-				this.generarMuestraLocM2( nMuestra );
+				this.generarMuestraInfracciones(nMuestra);
+				//this.generarMuestraLocM2( nMuestra );
 				view.printMensage("Muestra generada");
 				break;
 
 			case 3:
 				// Mostrar los datos de la muestra actual (original)
-				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
+				if ( nMuestra > 0 && muestraLoc != null )
 				{    
 					view.printDatosMuestra( nMuestra, muestraLoc);
 				}
@@ -400,7 +435,7 @@ public class Controller {
 
 			case 4:
 				// MaxColaPrioridad: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual
-				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
+				if ( nMuestra > 0 && muestraLoc != null)
 				{
 					tiempos = this.medirTiemposPromedio(new MaxColaPrioridad<LocationVO>());
 					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " nanosegundos.");
@@ -414,7 +449,7 @@ public class Controller {
 
 			case 5:
 				// MaxHeapCP: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual
-				if ( nMuestra > 0 && muestraLoc != null && muestraLoc.darTamano() == nMuestra )
+				if ( nMuestra > 0 && muestraLoc != null)
 				{
 					tiempos = this.medirTiemposPromedio(new MaxHeapCP<LocationVO>());
 					view.printMensage("Tiempo promedio de adicion: " + tiempos[0] + " nanosegundos.");
