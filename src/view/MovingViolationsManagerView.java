@@ -13,12 +13,12 @@ public class MovingViolationsManagerView
 	public void printMenu() {
 		System.out.println("---------ISIS 1206 - Estructuras de datos----------");
 		System.out.println("---------------------Taller 4----------------------");
-		System.out.println("1. Cargar datos de infracciones en movimiento");
-		System.out.println("2. Obtener una muestra de datos a ordenar");
-		System.out.println("3. Mostrar la muestra de datos a ordenar");
+		System.out.println("1. Cargar datos de infracciones en movimiento y LocationVO");
+		System.out.println("2. Obtener una muestra de datos para realizar pruebas");
+		System.out.println("3. Mostrar la muestra de datos actual");
 		System.out.println("4. MaxColaPrioridad: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual");
 		System.out.println("5. MaxHeapCP: Calcular tiempo promedio para agregar y eliminar datos segun la muestra actual");
-		System.out.println("6. Comparación de tiempos");
+		System.out.println("6. Comparación de tiempos MaxColaPrioridad vs MxHeapCP");
 		System.out.println("Digite el numero de opcion para ejecutar la tarea, luego presione enter: (Ej., 1):");
 		
 	}

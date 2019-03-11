@@ -25,7 +25,7 @@ import view.MovingViolationsManagerView;
 @SuppressWarnings("unused")
 public class Controller {
 
-	public static final String[] movingViolationsFilePaths = new String[] {"data/Moving_Violations_Issued_in_January_2018.csv", "data/Moving_Violations_Issued_in_February_2018.csv", "data/Moving_Violations_Issued_in_March_2018.csv","data/Moving_Violations_Issued_in__April_2018.csv"};
+	public static final String[] movingViolationsFilePaths = new String[] {"data/Moving_Violations_Issued_in_January_2018.csv", "data/Moving_Violations_Issued_in_February_2018.csv", "data/Moving_Violations_Issued_in_March_2018.csv","data/Moving_Violations_Issued_in_April_2018.csv"};
 
 	private MovingViolationsManagerView view;
 
