@@ -12,7 +12,7 @@ public class MovingViolationsManagerView
 	
 	public void printMenu() {
 		System.out.println("---------ISIS 1206 - Estructuras de datos----------");
-		System.out.println("---------------------Taller 4----------------------");
+		System.out.println("---------------------Taller ----------------------");
 		System.out.println("1. Cargar datos de infracciones en movimiento y LocationVO");
 		System.out.println("2. Obtener una muestra de datos para realizar pruebas");
 		System.out.println("3. Mostrar la muestra de datos actual");
